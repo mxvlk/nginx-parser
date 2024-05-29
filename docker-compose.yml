@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  python-parser:
+    build: python
+    volumes:
+      - ./input:/app/input
+      - ./output:/app/output
+  groff-to-pdf:
+    build: groff
+    volumes:
+      - ./input:/app/input
+      - ./output:/app/output
+    depends_on:
+      - python-parser

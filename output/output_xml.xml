@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<NginxConf>
+    <Key class="user">www www</Key>
+    <Key class="worker_processes">5</Key>
+    <Key class="error_log">logs/error.log</Key>
+    <Key class="pid">logs/nginx.pid</Key>
+    <Key class="worker_rlimit_nofile">8192</Key>
+    <Section class="events">
+        <Key class="worker_connections">4096</Key>
+    </Section>
+    <Section class="http">
+        <Key class="include">conf/mime.types</Key>
+        <Key class="include">/etc/nginx/proxy.conf</Key>
+        <Key class="include">/etc/nginx/fastcgi.conf</Key>
+        <Key class="index">index.html index.htm index.php</Key>
+        <Key class="default_type">application/octet-stream</Key>
+        <Key class="log_format">main '$remote_addr - $remote_user [$time_local] $status''&quot;$request&quot; $body_bytes_sent'</Key>
+        <Key class="access_log">logs/access.log  main</Key>
+        <Key class="sendfile">on</Key>
+        <Key class="tcp_nopush">on</Key>
+        <Key class="server_names_hash_bucket_size">128</Key>
+        <Subsection class="server">
+            <Key class="listen">80</Key>
+            <Key class="server_name">domain1.com www.domain1.com</Key>
+            <Key class="access_log">logs/domain1.access.log  main</Key>
+            <Key class="root">html</Key>
+            <Subsubsection class="location" path="~" modifier="\.php$">
+                <Key class="fastcgi_pass">127.0.0.1:1025</Key>
+            </Subsubsection>
+        </Subsection>
+        <Subsection class="server">
+            <Key class="listen">80</Key>
+            <Key class="server_name">domain2.com www.domain2.com</Key>
+            <Key class="access_log">logs/domain2.access.log  main</Key>
+            <Subsubsection class="location" path="~" modifier="^/(images|javascript|js|css|flash|media|static)/">
+                <Key class="root">/var/www/virtual/big.server.com/htdocs</Key>
+                <Key class="expires">30d</Key>
+            </Subsubsection>
+            <Subsubsection class="location" path="/">
+                <Key class="proxy_pass">http://127.0.0.1:8080</Key>
+            </Subsubsection>
+        </Subsection>
+        <Subsection class="upstream" description="big_server_com">
+            <Key class="server">127.0.0.3:8000 weight=5</Key>
+            <Key class="server">127.0.0.3:8001 weight=5</Key>
+            <Key class="server">192.168.0.1:8000</Key>
+            <Key class="server">192.168.0.1:8001</Key>
+        </Subsection>
+        <Subsection class="server">
+            <Key class="listen">80</Key>
+            <Key class="server_name">big.server.com</Key>
+            <Key class="access_log">logs/big.server.access.log main</Key>
+            <Subsubsection class="location" path="/">
+                <Key class="proxy_pass">http://big_server_com</Key>
+            </Subsubsection>
+        </Subsection>
+    </Section>
+</NginxConf>
